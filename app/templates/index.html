@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Recognizer</title>
+</head>
+<body>
+    <h1>Handwritten Digit Recognition</h1>
+    <canvas id="canvas" width="280" height="280" style="border:1px solid #000;"></canvas>
+    <br>
+    <button id="predictBtn">Predict</button>
+    <button id="clearBtn">Clear</button>
+    <h2>Result: <span id="result">-</span></h2>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 280, 280);
+
+        let drawing = false;
+        canvas.addEventListener('mousedown', () => drawing = true);
+        canvas.addEventListener('mouseup', () => drawing = false);
+        canvas.addEventListener('mousemove', (e) => {
+            if (!drawing) return;
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(e.offsetX, e.offsetY, 8, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        document.getElementById('clearBtn').onclick = () => {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, 280, 280);
+            document.getElementById('result').textContent = '-';
+        };
+
+        document.getElementById('predictBtn').onclick = async () => {
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('file', blob, 'digit.png');
+                const res = await fetch('/predict', { method: 'POST', body: formData });
+                const data = await res.json();
+                document.getElementById('result').textContent = `${data.digit} (${(data.confidence * 100).toFixed(1)}%)`;
+            });
+        };
+    </script>
+</body>
+</html>
