@@ -8,6 +8,9 @@ venv/
 *.h5
 *.pkl
 *.joblib
+
+# Keep the final trained model in the repo so the backend can load it.
+!models/mnist_cnn.keras
 *.pdf
 notebooks/.ipynb_checkpoints/
 .DS_Store
