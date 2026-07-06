@@ -10,6 +10,7 @@ is meant to keep the ML side (Student 1) and the backend/API side
 - `ml/preprocess.py` — the shared `prepare_image()` helper. The backend
   should use this so the input format always matches what the model was
   trained on.
+- `app/main.py` — the Flask web application implementing the backend server and prediction API.
 
 ## Model input
 
@@ -32,26 +33,19 @@ softmax probabilities for digits 0-9.
 - **predicted digit:** `int(np.argmax(probabilities))`
 - **confidence:** `float(np.max(probabilities))`
 
-## Example (backend usage)
+## API Contract (Flask Implementation)
 
-```python
-import numpy as np
-from PIL import Image
-from tensorflow.keras.models import load_model
+The backend exposes a prediction API on the `/predict` endpoint.
 
-from ml.preprocess import prepare_image
+- **URL:** `/predict`
+- **Method:** `POST`
+- **Consumes:** `multipart/form-data`
+- **Request Parameters:**
+  - `file`: The image file to classify.
 
-model = load_model("models/mnist_cnn.keras")
+### Success Response (200 OK)
 
-def predict_digit(image: Image.Image):
-    tensor = prepare_image(image)                 # (1, 28, 28, 1)
-    probabilities = model.predict(tensor)[0]      # shape (10,)
-    digit = int(np.argmax(probabilities))
-    confidence = float(np.max(probabilities))
-    return digit, confidence
-```
-
-Suggested JSON response from the `/predict` endpoint:
+Returns the predicted digit and confidence score.
 
 ```json
 {
@@ -59,3 +53,24 @@ Suggested JSON response from the `/predict` endpoint:
   "confidence": 0.994
 }
 ```
+
+### Error Responses (400 Bad Request)
+
+- If no file is uploaded:
+  ```json
+  {
+    "error": "No file uploaded"
+  }
+  ```
+- If an empty file/filename is selected:
+  ```json
+  {
+    "error": "No file selected"
+  }
+  ```
+- If the file is not a valid image:
+  ```json
+  {
+    "error": "Invalid image file"
+  }
+  ```
