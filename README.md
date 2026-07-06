@@ -4,11 +4,11 @@
 
 ## الأعضاء
 - محمد كريم الخياط — mhd_kareem_341562
-- ...
+- علي فائز اسماعيل — ali_351343
 
 ## التقنيات المستخدمة
 - Python, TensorFlow/Keras
-- Flask / FastAPI
+- Flask
 - HTML/CSS/JavaScript
 - GitHub
 
@@ -17,13 +17,16 @@
 pip install -r requirements.txt
 ```
 
-تدريب النموذج (الجزء الجاهز حالياً):
+تدريب النموذج:
 ```bash
 python -m ml.train
 ```
 
-الواجهة الخلفية (backend) والواجهة الأمامية (frontend) قيد التطوير.
-راجع `CONTRACT.md` لطريقة استخدام النموذج من جهة الـ backend.
+تشغيل تطبيق الويب:
+```bash
+python app/main.py
+```
+
 
 ## روابط النشر
 - التطبيق: ...
@@ -35,5 +38,5 @@ python -m ml.train
 - `models/` : النموذج المدرَّب المحفوظ
 - `report/` : ملف التسليم النهائي
 - `CONTRACT.md` : واجهة الاتفاق بين جهة الـ ML وجهة الـ backend
-- `app/` : تطبيق الويب (backend) — لم يُنشأ بعد
+- `app/` : تطبيق الويب (backend)
 - `frontend/` : واجهة المستخدم — لم تُنشأ بعد
