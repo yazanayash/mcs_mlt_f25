@@ -1,50 +1,495 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digit Recognizer</title>
+    <title>Handwritten Digit Recognition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 520px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 8px;
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #636e72;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .instructions {
+            background: #dfe6e9;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3436;
+        }
+
+        .instructions ul {
+            margin: 0;
+            padding-right: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 4px;
+        }
+
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #digitCanvas {
+            border: 2px solid #b2bec3;
+            border-radius: 8px;
+            cursor: crosshair;
+            background: white;
+            touch-action: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #clearBtn {
+            background: #ff7675;
+            color: white;
+        }
+
+        #clearBtn:hover {
+            background: #d63031;
+            transform: translateY(-1px);
+        }
+
+        #predictBtn {
+            background: #0984e3;
+            color: white;
+        }
+
+        #predictBtn:hover {
+            background: #075a8a;
+            transform: translateY(-1px);
+        }
+
+        #predictBtn:disabled {
+            background: #b2bec3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .upload-area {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 24px;
+            border: 2px dashed #b2bec3;
+            border-radius: 8px;
+            background: #fafafa;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #0984e3;
+            background: #f0f8ff;
+        }
+
+        .upload-label {
+            display: inline-block;
+            cursor: pointer;
+            color: #0984e3;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-label span {
+            display: inline-block;
+            background: #0984e3;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .upload-label span:hover {
+            background: #075a8a;
+        }
+
+        #fileName {
+            color: #636e72;
+            font-size: 13px;
+            margin-top: 12px;
+            min-height: 19px;
+        }
+
+        .result-box {
+            background: #2d3436;
+            color: white;
+            padding: 24px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .result-digit {
+            font-size: 72px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .result-confidence {
+            font-size: 16px;
+            opacity: 0.85;
+        }
+
+        .error-box {
+            background: #ff7675;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .error-box.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #dfe6e9;
+            border-top: 3px solid #0984e3;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        .loading-text {
+            color: #636e72;
+            font-size: 13px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <h1>Handwritten Digit Recognition</h1>
-    <canvas id="canvas" width="280" height="280" style="border:1px solid #000;"></canvas>
-    <br>
-    <button id="predictBtn">Predict</button>
-    <button id="clearBtn">Clear</button>
-    <h2>Result: <span id="result">-</span></h2>
+    <div class="container">
+        <h1>Handwritten Digit Recognition</h1>
+        <p class="subtitle">Draw a digit or upload an image to predict</p>
+
+        <div class="instructions">
+            <strong>How to use:</strong>
+            <ul>
+                <li>Draw a single digit (0-9) on the canvas using your mouse or touch</li>
+                <li>Or upload a handwritten digit image</li>
+                <li>Click "Predict" to see the result</li>
+            </ul>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="digitCanvas" width="280" height="280"></canvas>
+        </div>
+
+        <div class="button-row">
+            <button id="clearBtn">Clear</button>
+            <button id="predictBtn">Predict</button>
+        </div>
+
+        <div class="upload-area">
+            <label for="fileInput" class="upload-label">
+                <span>Upload Image</span>
+            </label>
+            <input type="file" id="fileInput" accept="image/*">
+            <div id="fileName"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Processing...</div>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <div class="result-digit" id="resultDigit">?</div>
+            <div class="result-confidence" id="resultConfidence"></div>
+        </div>
+
+        <div class="error-box" id="errorBox">
+            <div id="errorMsg"></div>
+        </div>
+    </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
+        // === Canvas Setup ===
+        const canvas = document.getElementById('digitCanvas');
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, 280, 280);
+        let isDrawing = false;
+        let imageUploaded = false;
 
-        let drawing = false;
-        canvas.addEventListener('mousedown', () => drawing = true);
-        canvas.addEventListener('mouseup', () => drawing = false);
-        canvas.addEventListener('mousemove', (e) => {
-            if (!drawing) return;
-            ctx.fillStyle = 'black';
+        // Initialize canvas (white background)
+        function initCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 15;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = 'black';
+        }
+
+        initCanvas();
+
+        // === Mouse Events ===
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // === Touch Events ===
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
             ctx.beginPath();
-            ctx.arc(e.offsetX, e.offsetY, 8, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(x, y);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        // === Clear Button ===
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            initCanvas();
+            hideResult();
+            hideError();
+            clearFileName();
+            imageUploaded = false;
         });
 
-        document.getElementById('clearBtn').onclick = () => {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, 280, 280);
-            document.getElementById('result').textContent = '-';
-        };
+        // === File Upload ===
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileName');
 
-        document.getElementById('predictBtn').onclick = async () => {
-            canvas.toBlob(async (blob) => {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = `Selected: ${file.name}`;
+                loadImage(file);
+                imageUploaded = true;
+            }
+        });
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    initCanvas();
+                    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                    const x = (canvas.width / 2) - (img.width / 2) * scale;
+                    const y = (canvas.height / 2) - (img.height / 2) * scale;
+                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // === Predict Button ===
+        document.getElementById('predictBtn').addEventListener('click', async () => {
+            hideResult();
+            hideError();
+            showLoading();
+
+            // Remove file name when predicting after drawing
+            if (!imageUploaded) {
+                clearFileName();
+            }
+
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 const formData = new FormData();
                 formData.append('file', blob, 'digit.png');
-                const res = await fetch('/predict', { method: 'POST', body: formData });
-                const data = await res.json();
-                document.getElementById('result').textContent = `${data.digit} (${(data.confidence * 100).toFixed(1)}%)`;
-            });
-        };
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                hideLoading();
+
+                if (response.ok) {
+                    showResult(data.digit, data.confidence);
+                } else {
+                    showError(data.error || 'An unexpected error occurred');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Failed to connect to server: ' + error.message);
+            }
+        });
+
+        // === Display Functions ===
+        function showResult(digit, confidence) {
+            const resultBox = document.getElementById('resultBox');
+            const resultDigit = document.getElementById('resultDigit');
+            const resultConfidence = document.getElementById('resultConfidence');
+
+            resultDigit.textContent = digit;
+            resultConfidence.textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+            resultBox.classList.add('show');
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            const errorMsg = document.getElementById('errorMsg');
+
+            errorMsg.textContent = message;
+            errorBox.classList.add('show');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('predictBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('predictBtn').disabled = false;
+        }
+
+        function hideResult() {
+            document.getElementById('resultBox').classList.remove('show');
+        }
+
+        function hideError() {
+            document.getElementById('errorBox').classList.remove('show');
+        }
+
+        function clearFileName() {
+            fileNameDisplay.textContent = '';
+        }
     </script>
 </body>
 </html>
