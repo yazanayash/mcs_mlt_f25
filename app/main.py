@@ -7,16 +7,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import numpy as np
+import keras
 from flask import Flask, jsonify, render_template, request
 from PIL import Image
-from tensorflow.keras.models import load_model
 
 from ml.preprocess import prepare_image
 
 app = Flask(__name__)
 
 MODEL_PATH = ROOT / "models" / "mnist_cnn.keras"
-model = load_model(str(MODEL_PATH))
+model = keras.models.load_model(str(MODEL_PATH))
 
 
 @app.route("/")
