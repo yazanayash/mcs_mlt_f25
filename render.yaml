@@ -3,6 +3,9 @@ services:
     name: mcs-mlt-f25-digit-recognition
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app.main:app
+    buildCommand: python -m pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn app.main:app --timeout 120
     autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
