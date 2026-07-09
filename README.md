@@ -3,12 +3,12 @@
 تطبيق ويب للتعرف على الأرقام المكتوبة يدوياً باستخدام Machine Learning.
 
 ## الأعضاء
-- ...
+- زاهر كامل zaher_344165
 - ...
 
 ## التقنيات المستخدمة
-- Python, TensorFlow/Keras
-- Flask / FastAPI
+- Python, TensorFlow
+- Flask 
 - HTML/CSS/JavaScript
 - GitHub
 
