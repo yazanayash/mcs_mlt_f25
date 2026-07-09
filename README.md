@@ -30,8 +30,8 @@ python app/main.py
 
 
 ## روابط النشر
-- التطبيق: ...
-- المستودع: ...
+- التطبيق: https://mcs-mlt-f25-digit-recognition.onrender.com/
+- المستودع: https://github.com/yazanayash/mcs_mlt_f25
 
 ## بنية المستودع
 - `ml/` : كود الـ Machine Learning (تحميل البيانات، النموذج، التدريب، التقييم، المعالجة المسبقة)
